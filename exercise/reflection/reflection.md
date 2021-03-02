@@ -42,7 +42,10 @@ https://bot-man-jl.github.io/articles/?post=2018/Cpp-Struct-Field-Reflection
 
 要理解结构体字段反射，需要先理解如何去遍历tuple...这篇博客也讲得很清楚：https://www.cnblogs.com/happenlee/p/14219925.html
 
+
 结构体字段的反射就是在此基础上进一步输出类型字段名
+
+遍历tuple的代码：
 ```c++
 template <typename Tuple, typename Func, size_t ... N>
 void func_call_tuple(const Tuple& t, Func&& func, std::index_sequence<N...>) {
@@ -62,4 +65,7 @@ int main() {
 }
 ```
 1. make_index_sequence
-    用于在编译期生成一组顺序数列，可以配合tuple完成遍历。
+    具体实现可以参考https://blog.csdn.net/dboyguan/article/details/51706357
+2. initializer_list
+    具体使用参考：https://www.zhihu.com/question/443285720，链接中也提出了在c++17中可以用折叠表达式很方便的代替。
+3. std::forward或者万能引用、右值引用等参考基本的语法书即可。
