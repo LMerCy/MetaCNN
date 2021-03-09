@@ -1,3 +1,4 @@
+namespace MetaCNN{
 namespace NSVarTypedict{
 // Create_ demontrates how to create a container without type info of NullParamter with Constant length. 
 // T is important, it contains the paramter that has already generated. At first time T is empty.
@@ -112,3 +113,4 @@ public:
         using type = typename Create_<sizeof...<TParameters>,Values>::type;
     }
 }; 
+}
