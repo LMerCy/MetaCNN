@@ -1,3 +1,5 @@
+# 习惯c++
+
 ## 条款02 - 使用const,enums,template inline代替define
 
 - 以const代替#define，一是可以提高编译时报错定位效率，二是define并不重视作用域，尤其是类内的变量。
@@ -15,7 +17,24 @@
 - 手工初始化内置类型
 - 使用local static 对象替换non-local static对象，就是单件模式。。。
 
+# 构造/析构/赋值运算
+
 ## 条款05 - 了解c++默默编写并调用哪些函数
 
 - 一共4个，copy构造函数，copy assignment 操作符，析构函数，另外在没有声明任何构造函数的情况下会生成默认构造函数。
 - c++不允许“让reference改指向不同的对象”和“const成员不可更改”，所以对于类内含有reference和const成员的情况，编译器不会生成copy assignment.
+- 基类的copy assignment是私有的话，编译器也不会为派生类生成copy assignment.
+
+## 条款06 - 若不想使用编译器自动生成的函数，就该明确拒绝
+
+- 使用privete的copy assignment和copy构造函数，避免被拷贝
+- 继承uncopyable类，改积累实现了private的拷贝相关构造函数，且该类的析构函数不一定要是虚函数。
+- 使用delete（原书是03版本，还没有delete）
+
+## 条款07 - 为多态基类声明virtual析构函数
+
+- 如题目所示，只有用于多态的基类，才需要将析构函数声明为virtual
+- 如果类内有virtual函数，那么他必然要有virtual析构函数（原文是几乎确定有）。
+- 不要去继承没有virtual析构函数的类，其实这一点也挺重要的，意味着==不要去继承stl容器之类的类==。
+- 也不要为所有的类去声明一个virtual析构函数，因为virtual函数会带来虚表，从而带来更大的占用。
+- ==纯虚函数也是可以提供定义的！！== 为什么要这么做，文中说有时候需要一个抽象class（啥情况啊。。。）
