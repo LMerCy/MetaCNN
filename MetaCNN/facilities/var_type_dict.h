@@ -95,7 +95,7 @@ struct VarTypeDict
                 rawVal * nPtr = static_cast<rawVal*>(ptr);// tmp already is rawVal*, why need converted here?
                 delete nPtr;
             });
-            // how about this? m_tuple[TagPos] = std::shared_ptr<void>(tmp)
+            // m_tuple[TagPos] = std::shared_ptr<void>(tmp); // this seems work, but i don't know what it would affect
             using new_type = NewTupleType<rawVal, TagPos, Values<>, TTypes...>; // 2.TTypes represent "Type"
             return new_type(std::move(m_tuple)); // 3.m_tuple saves "value"
         }
