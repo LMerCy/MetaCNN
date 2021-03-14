@@ -91,11 +91,14 @@ struct VarTypeDict
             //then the Values should be changed.
             using rawVal = std::decay_t<TVal>;
             rawVal* tmp = new rawVal(std::forward<TVal>(val)); // here change val to smart-ptr to be converted to void ptr later.
+            // tmp already is rawVal*, why need converted here?
+            // because direct overite m_tuple[pos] will cause  mem leak(origin mem cannot be released)
+            // see effective c++ rule 11
             m_tuple[TagPos] = std::shared_ptr<void>(tmp, [](void* ptr){
-                rawVal * nPtr = static_cast<rawVal*>(ptr);// tmp already is rawVal*, why need converted here?
+                rawVal * nPtr = static_cast<rawVal*>(ptr);
                 delete nPtr;
             });
-            // m_tuple[TagPos] = std::shared_ptr<void>(tmp); // this seems work, but i don't know what it would affect
+            // m_tuple[TagPos] = std::shared_ptr<void>(tmp); // Wrong
             using new_type = NewTupleType<rawVal, TagPos, Values<>, TTypes...>; // 2.TTypes represent "Type"
             return new_type(std::move(m_tuple)); // 3.m_tuple saves "value"
         }

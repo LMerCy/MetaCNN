@@ -1,6 +1,6 @@
-#include "var_type_dict.h"
+// #include "var_type_dict.h"
 #include<iostream>
-// #include<MetaCNN/facilities/var_type_dict.h>
+#include<MetaCNN/facilities/var_type_dict.h>
 using namespace MetaCNN;
 struct A;
 struct B; 

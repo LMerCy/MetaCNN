@@ -1,4 +1,4 @@
-# 习惯c++
+#1. 习惯c++
 
 ## 条款02 - 使用const,enums,template inline代替define
 
@@ -17,7 +17,7 @@
 - 手工初始化内置类型
 - 使用local static 对象替换non-local static对象，就是单件模式。。。
 
-# 构造/析构/赋值运算
+#2. 构造/析构/赋值运算
 
 ## 条款05 - 了解c++默默编写并调用哪些函数
 
@@ -84,3 +84,28 @@
 
 - 派生类的拷贝函数不仅需要拷贝派生类自己的成员变量，还需要调用父类的拷贝函数来对父类的成员变量进行赋值。（否则基类自身会调用构造函数进行构造。）
 - 同一个类不要用一个copy函数调用另一个copy函数。
+
+# 3. 资源管理
+
+## 条款13 以对象管理资源
+
+- RAII就是获得一笔资源后于同一语句内以初始化某个管理对象，他们在构造函数中获得资源，在析构函数中释放资源。
+- 典型RAII如shared_ptr。但是需要注意没有特别针对C++动态分配数组而设计的shared_ptr之类的东西，因为shared_ptr的析构函数做的是delete而不是delete[]（两者差别见条款16），另外我们也可以用vector来取代数组。
+
+## 条款14 在资源管理类中小心copying行为
+
+- RAII对象主要是管理heap-based资源，但是像Mutex之类的资源对象，则需要自定义的RAII对象，这里的意思是我们希望确保将一个被锁住(lock)的Mutex解锁（unlock）,而不是单纯创建和释放对象。但是这个时候需要对RAII对象的拷贝操作：
+    - 禁止复制，将copying函数声明为private.
+    - 使用shared_ptr保存Mutex *mutexPtr，但是当计数器为0的时候需要调用unlock，而不是释放资源。以上两点最终的代码如下：
+    ```C++
+    class Lock: private Uncopyable{
+    public:
+        explict Lock(Mutex* pm):mutexPtr(pm, unlock){//注意这里是显示的，没有隐示转换。
+            lock(mutexPtr.get());
+        }
+        // 并不需要析构函数，因为mutexPtr不是static的成员变量，编译器会自动合成正确的析构函数。当引用计数器为0时，会自动调用unlock.
+    private:
+        std::shared_ptr<Mutex> mutexPtr;
+    }
+    ```
+- 另外的拷贝行为还包括深度拷贝和移动。
