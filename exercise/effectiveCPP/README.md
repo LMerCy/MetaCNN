@@ -109,3 +109,25 @@
     }
     ```
 - 另外的拷贝行为还包括深度拷贝和移动。
+
+## 条款15 在资源管理类中提供对原始资源的访问
+
+- 例如shared_ptr可以通过get()获取到原始资源，且其重载了指针取值和指针操作符（operator-> 和operator*）
+- 除了通过get()来获取资源，也可以通过显示转换或者隐式转换来实现，通常使用显示转换来保证安全性。
+
+## 条款16 成对使用new和delete时要采取相同形式
+
+- 当你在new表达式中使用[],必须在相应的delete表达式中使用[],反之亦然。
+
+## 条款17 以独立语句讲newed对象置入智能指针
+
+- shared_ptr的构造函数是显式的，不可以隐式转换
+- 不可以写如下代码：
+    ```C++
+    prcocessWidget(std::tr1::shared_ptr<Widget>(new Widget), priority())
+    ```
+    因为首先new widget，调用shared_ptr构造函数，priority三者之间的调用关系是不固定的，若是priority()发生在shared_ptr构造函数调用前，且发送异常，那么new Widget返回的指针将会遗失，会导致资源泄露，所以我们要改写成这样：
+    ```C++ 
+    std::shared_ptr<Widget> pw(new Widget);
+    processWidget(pw, priority());
+    ```
