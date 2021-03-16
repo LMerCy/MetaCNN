@@ -131,3 +131,14 @@
     std::shared_ptr<Widget> pw(new Widget);
     processWidget(pw, priority());
     ```
+
+## 条款18 让接口容易被正确使用，不易被误用
+
+- 使用类来实现类似具名参数的作用，以减少赋值错误。
+- 让类别容易使用的一种方式是让其尽量保持和内置类型一样的接口。
+- 阻止无用的方法包括建立新类型（类似具名参数），限制类型上的操作，束缚对象值（如以const修饰operator*，防止出现a*b=c的赋值操作），消除客户的资源管理责任（shared_ptr）
+- shared_ptr支持定制型删除器，可以防范cross-dll problem，也可被用来自动解除互斥锁。
+
+## 条款19 设计class犹如设计type
+
+过于复杂。。。
