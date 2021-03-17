@@ -1,3 +1,4 @@
+[toc]
 #1. 习惯c++
 
 ## 条款02 - 使用const,enums,template inline代替define
@@ -142,3 +143,19 @@
 ## 条款19 设计class犹如设计type
 
 过于复杂。。。
+
+## 条款20 宁以pass-by-reference-to-const替换pass-by-value
+
+- 尽量使用pass-by-reference-to-const替换pass-by-value，因为更高效，且能避免切割问题，切割问题是指如果函数的形参是基类，实参是派生类，以值传参的时候只会传入基类部分。
+- 以上规则不适用于内置类型，stl的迭代器和函数对象，对于stl的迭代器，具体原因是：
+    >One thing that comes to my mind and which is against the constness in the reference: the iterators need to be modified when using them.
+    >
+    >Another implementation detail may be that iterators are really just implemented as pointers. So are references in most cases. If you pass the pointer by value, you copy it once but dereference it only when needed. If, however, the iterator-pointer itself is passed by a reference-pointer, then that has to be dereferenced first, just in order to get to the iterator, and that must be done each time the iterator is accessed. That is superfluous.
+- 对于自定义的struct有需要讨论的地方，对于确实很小的struct（构造不昂贵），不同的编译器可能会存在差别待遇，另外struct本身是有可能增长的，所以最好还是pass-by-reference.
+
+## 条款21 必须返回对象时，别妄想返回其reference
+
+- 绝不要返回pointer或者reference指向一个==local stack==对象，或返回reference指向一个==heap-allocated==对象，或返回pointer或reference指向一个local static对象而有可能同时需要多个这个对象。
+    - 第一点实际上指向了一个会被销毁的临时对象
+    - 第二点可能会在堆上分配一个无法被销毁的对象，如连乘的过程中产生的中间变量
+    - 第三点是指如果同时需要多个这个对象，而由于其是static的，客户看到的都是同一个值。
