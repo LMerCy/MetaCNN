@@ -240,3 +240,53 @@
     ```
 - 代替dynamic_cast比较好的方式是继承+多态。
 - 使用新式转型的好处是很容易在代码中找到。
+
+## 条款29 为“异常安全”而努力是值得的
+
+首先我们来看一个代码，看看非异常安全带来的问题：
+```c++
+void PrettyMenu::changeBackground(std::istream& imgSrc){
+    lock(&mutex);
+    delete bgImage;
+    ++imageChanges;
+    bgImage = new Image(imgSrc);
+    unlock(&mutex);
+}
+```
+如果new那里抛出异常，那么首先锁就一直被占住了，对于这种一般用于并发控制的代码，这就是灾难了。其次bgImage指向了一个被删除的对象，修改次数也增加了。这就是非异常安全带来的问题，因此异常安全也就要求提供了三种保证，可以选择一个满足：
+- 基本保证，异常被抛出后，程序内的任何事物仍然保持在有效状态下，但是实际状态可能不可预料，比如newImage可能指向原图，也可能指向一个缺省的图。
+- 强烈保证，异常抛出，程序状态不会改变。
+- 不抛掷保证，承诺绝不抛出异常，作用于内置类型身上的所有操作都提供nothrow保证。
+
+那针对上面的代码，我们怎么改进呢，首先如果是要满足基本保证，只需要把资源管理相关的替换为RAII即可：
+```c++
+class PrettyMenu{
+    std::shared_ptr<Image> bgImage;
+}
+void PrettyMenu::changeBackground(std::istream& imgSrc){
+    Lock(&mutex);
+    bgImage.reset(new Image(imgSrc));
+    ++imageChanges;
+```
+
+如果要实现强烈保证，需要使用copy and swap技术，这个技术实际上就是任何资源相关操作我们现在临时变量上操作，没问题了再基于swap来替换原资源。具体实现的时候需要先将所有隶属对象的数据从原对象放进另一个对象内，然后赋予原对象一个指针，指向所谓的实现对象，这种手法被称为pimpl idiom，具体见条款31，代码如下：
+```c++
+struct PMImpl{
+    std::shared_ptr<Image> bgImage;
+    int imageChanges;
+};
+class prettyMenu{
+...
+private:
+    std::shared_ptr<PMImpl> pImpl;
+    Mutex mutex;
+};
+void PrettyMenu::changeBackground(std::istream& imgSrc){
+    using std::swap;
+    Lock(&mutex);
+    std::shapred_ptr<PMImpl> pNew(new PMImpl(*pImpl));
+    pNew->bgImage.reset(new Image(imgSrc));
+    ++pNew->imageChanges;
+    swap(pImpl,pNew);
+}
+```
